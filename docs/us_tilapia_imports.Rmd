@@ -1,0 +1,47 @@
+---
+title: 'Day 5: Task 2'
+author: "Clarissa Boyajian"
+date: "8/13/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(janitor)
+```
+
+```{r}
+us_tilapia_imports <- read_csv(here::here("data", "us_tilapia_imports.csv"))
+
+us_tilapia_imports_longer <- us_tilapia_imports %>% 
+  pivot_longer(!country, names_to = "year", values_to = "import_number") %>% 
+  mutate(year = as.numeric(year))
+
+yearly_tilapia_tot <- us_tilapia_imports_longer %>% 
+  dplyr::group_by(year) %>% 
+  summarize(total_imports = sum(import_number, na.rm = TRUE))
+
+ggplot(data = yearly_tilapia_tot, aes(x = year, y = total_imports)) +
+  geom_line() +
+  labs(x = "Year",
+       y = "Total Annual Imports")
+
+ggsave(here::here("figs", "yearly_tilapia_tot.png"))
+
+yearly_tilapia_tot_EcHonCRicMex <- us_tilapia_imports_longer %>% 
+  filter(country %in% c("Ecuador", "Honduras", "Costa Rica", "Mexico"))
+
+ggplot(data = yearly_tilapia_tot_EcHonCRicMex, aes(x = year, y = import_number)) +
+  geom_line(aes(color = country)) +
+  labs(title = "US Tilapia Imports from Honduras, Ecuador, Mexico, & Costa Rica",
+       x = "Year",
+       y = "Total Annual Imports") +
+  theme_gray() +
+  scale_color_manual(values = c("darkblue", "darkgreen", "pink", "purple"))
+  
+ggsave(here::here("figs", "tilapia_EcHonCRicMex_import_graph.jpg"))
+```
+
+
